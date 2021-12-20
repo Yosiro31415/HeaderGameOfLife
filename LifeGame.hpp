@@ -1,33 +1,106 @@
-﻿#ifndef _LIFEGAME_
-#define _LIFEGAME_
+﻿#ifndef _GAMEOFLIFE_
+#define _GAMEOFLIFE_
 
 #include <vector>
 #include <iostream>
+#include <random>
 
-namespace LIFEGAME {
-struct CellLifeGame {
+namespace GOL {
+struct CellGoL {
     bool isAlive = false;
 };
 
-class LifeGame {
-    int height;
-    int width;
+class GameLife {
+    const int height;
+    const int width;
 
 protected:
-    std::vector<std::vector<CellLifeGame>> tile = {}; //縦横の予定
-    int checkCell(int in_y, int in_x, std::vector<std::vector<CellLifeGame>>* oldTile);
+    std::vector<std::vector<CellGoL>> tile = {}; //(y,x)coodinate
+    int checkCell(int in_y, int in_x, std::vector<std::vector<CellGoL>>* oldTile);
 
 public:
-    LifeGame(std::vector<std::vector<CellLifeGame>> in_tile);
-    LifeGame(std::vector<std::vector<int>> in_tile);
-    ~LifeGame();
+    GameLife();
+    GameLife(int in_height, int in_width);
+    GameLife(int probability);
+    GameLife(int in_height, int in_width, int probability);
+    GameLife(std::vector<std::vector<CellGoL>> in_tile);
+    GameLife(std::vector<std::vector<int>> in_tile);
+    ~GameLife();
     int update();
     std::vector<std::vector<int>> output();
 
-    int showOutputCL(LifeGame* LG);
+    int showOutput(GameLife* LG);
 };
 
-int showOutput(LifeGame* LG) {
+GameLife::GameLife(int in_height, int in_width) : width(in_width), height(in_height) {
+    std::mt19937 mt{std::random_device{}()};
+    std::uniform_int_distribution<int> dist(0, 99);
+
+    for (int i = 0; i < height; i++) {
+        std::vector<CellGoL> line = {};
+        for (int j = 0; j < width; j++) {
+            CellGoL cell;
+            if (dist(mt) < 20) {
+                cell.isAlive = true;
+            }
+            line.push_back(cell);
+        }
+        tile.push_back(line);
+    }
+}
+
+GameLife::GameLife(int in_height, int in_width, int probability) : width(in_width), height(in_height) {
+    std::mt19937 mt{std::random_device{}()};
+    std::uniform_int_distribution<int> dist(0, 99);
+
+    for (int i = 0; i < height; i++) {
+        std::vector<CellGoL> line = {};
+        for (int j = 0; j < width; j++) {
+            CellGoL cell;
+            if (dist(mt) < probability) {
+                cell.isAlive = true;
+            }
+            line.push_back(cell);
+        }
+        tile.push_back(line);
+    }
+}
+
+GameLife::GameLife() : width(500), height(500) {
+    std::mt19937 mt{std::random_device{}()};
+    std::uniform_int_distribution<int> dist(0, 99);
+
+    for (int i = 0; i < height; i++) {
+        std::vector<CellGoL> line = {};
+        for (int j = 0; j < width; j++) {
+            CellGoL cell;
+            if (dist(mt) < 20) {
+                cell.isAlive = true;
+            }
+            line.push_back(cell);
+        }
+        tile.push_back(line);
+    }
+}
+
+GameLife::GameLife(int probability) : width(500), height(500) {
+    std::mt19937 mt{std::random_device{}()};
+    std::uniform_int_distribution<int> dist(0, 99);
+
+    for (int i = 0; i < height; i++) {
+        std::vector<CellGoL> line = {};
+        for (int j = 0; j < width; j++) {
+            CellGoL cell;
+            if (dist(mt) < probability) {
+                cell.isAlive = true;
+            }
+            line.push_back(cell);
+        }
+        tile.push_back(line);
+    }
+}
+
+int GameLife::showOutput(GameLife* LG) {
     system("cls");
     std::vector<std::vector<int>> OP = LG->output();
     for (int i = 0; i < OP.size(); i++) {
@@ -41,21 +114,19 @@ int showOutput(LifeGame* LG) {
         std::cout << std::endl;
     }
     return 0;
-}
-
-LifeGame::LifeGame(std::vector<std::vector<CellLifeGame>> in_tile) {
-    tile = in_tile;
-    width = in_tile.at(0).size();
-    height = in_tile.size();
 };
 
-LifeGame::LifeGame(std::vector<std::vector<int>> in_tile) {
-    height = in_tile.size();
-    width = in_tile.at(0).size();
+GameLife::GameLife(std::vector<std::vector<CellGoL>> in_tile) : height(in_tile.size()), width(in_tile.at(0).size()) {
+
+    tile = in_tile;
+};
+
+GameLife::GameLife(std::vector<std::vector<int>> in_tile) : height(in_tile.size()), width(in_tile.at(0).size()) {
+
     for (int i = 0; i < height; i++) {
-        std::vector<CellLifeGame> line = {};
+        std::vector<CellGoL> line = {};
         for (int j = 0; j < width; j++) {
-            CellLifeGame cell;
+            CellGoL cell;
             if (in_tile.at(i).at(j) > 0)
                 cell.isAlive = true;
             line.push_back(cell);
@@ -64,12 +135,12 @@ LifeGame::LifeGame(std::vector<std::vector<int>> in_tile) {
     }
 };
 
-LifeGame::~LifeGame(){
+GameLife::~GameLife(){
 
 };
-int LifeGame::update() {
+int GameLife::update() {
 
-    std::vector<std::vector<CellLifeGame>> oldTile;
+    std::vector<std::vector<CellGoL>> oldTile;
     oldTile = tile;
 
     for (int i = 0; i < height; i++) {
@@ -80,7 +151,7 @@ int LifeGame::update() {
     return 0;
 };
 
-int LifeGame::checkCell(int in_y, int in_x, std::vector<std::vector<CellLifeGame>>* oldTile) {
+int GameLife::checkCell(int in_y, int in_x, std::vector<std::vector<CellGoL>>* oldTile) {
 
     int head = in_y + 1;
     int foot = in_y - 1;
@@ -113,24 +184,20 @@ int LifeGame::checkCell(int in_y, int in_x, std::vector<std::vector<CellLifeGame
         numLivCel++;
     if (oldTile->at(in_y).at(in_x).isAlive) {
         if (numLivCel == 2 || numLivCel == 3) {
-            tile.at(in_y).at(in_x).isAlive = true;
         } else
             tile.at(in_y).at(in_x).isAlive = false;
     } else {
-        if (numLivCel == 3) {
+        if (numLivCel == 3)
             tile.at(in_y).at(in_x).isAlive = true;
-
-        } else
-            tile.at(in_y).at(in_x).isAlive = false;
     }
     return 0;
 };
-std::vector<std::vector<int>> LifeGame::output() {
+std::vector<std::vector<int>> GameLife::output() {
     std::vector<std::vector<int>> OP;
     for (int i = 0; i < height; i++) {
         std::vector<int> line = {};
         for (int j = 0; j < width; j++) {
-            CellLifeGame cell;
+            CellGoL cell;
             if (tile.at(i).at(j).isAlive)
                 cell.isAlive = true;
             line.push_back(cell.isAlive);
@@ -139,5 +206,5 @@ std::vector<std::vector<int>> LifeGame::output() {
     }
     return OP;
 };
-} // namespace LIFEGAME
+} // namespace GOL
 #endif
