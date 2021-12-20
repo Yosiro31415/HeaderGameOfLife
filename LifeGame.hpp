@@ -29,42 +29,8 @@ public:
     int update();
     std::vector<std::vector<int>> output();
 
-    int showOutput(GameLife* LG);
+    int dispOutput(GameLife* LG);
 };
-
-GameLife::GameLife(int in_height, int in_width) : width(in_width), height(in_height) {
-    std::mt19937 mt{std::random_device{}()};
-    std::uniform_int_distribution<int> dist(0, 99);
-
-    for (int i = 0; i < height; i++) {
-        std::vector<CellGoL> line = {};
-        for (int j = 0; j < width; j++) {
-            CellGoL cell;
-            if (dist(mt) < 20) {
-                cell.isAlive = true;
-            }
-            line.push_back(cell);
-        }
-        tile.push_back(line);
-    }
-}
-
-GameLife::GameLife(int in_height, int in_width, int probability) : width(in_width), height(in_height) {
-    std::mt19937 mt{std::random_device{}()};
-    std::uniform_int_distribution<int> dist(0, 99);
-
-    for (int i = 0; i < height; i++) {
-        std::vector<CellGoL> line = {};
-        for (int j = 0; j < width; j++) {
-            CellGoL cell;
-            if (dist(mt) < probability) {
-                cell.isAlive = true;
-            }
-            line.push_back(cell);
-        }
-        tile.push_back(line);
-    }
-}
 
 GameLife::GameLife() : width(500), height(500) {
     std::mt19937 mt{std::random_device{}()};
@@ -100,21 +66,39 @@ GameLife::GameLife(int probability) : width(500), height(500) {
     }
 }
 
-int GameLife::showOutput(GameLife* LG) {
-    system("cls");
-    std::vector<std::vector<int>> OP = LG->output();
-    for (int i = 0; i < OP.size(); i++) {
-        for (int j = 0; j < OP.at(0).size(); j++) {
-            if (!OP.at(i).at(j)) {
-                std::cout << "□ ";
-            } else {
-                std::cout << "■ ";
+GameLife::GameLife(int in_height, int in_width) : width(in_width), height(in_height) {
+    std::mt19937 mt{std::random_device{}()};
+    std::uniform_int_distribution<int> dist(0, 99);
+
+    for (int i = 0; i < height; i++) {
+        std::vector<CellGoL> line = {};
+        for (int j = 0; j < width; j++) {
+            CellGoL cell;
+            if (dist(mt) < 20) {
+                cell.isAlive = true;
             }
+            line.push_back(cell);
         }
-        std::cout << std::endl;
+        tile.push_back(line);
     }
-    return 0;
-};
+}
+
+GameLife::GameLife(int in_height, int in_width, int probability) : width(in_width), height(in_height) {
+    std::mt19937 mt{std::random_device{}()};
+    std::uniform_int_distribution<int> dist(0, 99);
+
+    for (int i = 0; i < height; i++) {
+        std::vector<CellGoL> line = {};
+        for (int j = 0; j < width; j++) {
+            CellGoL cell;
+            if (dist(mt) < probability) {
+                cell.isAlive = true;
+            }
+            line.push_back(cell);
+        }
+        tile.push_back(line);
+    }
+}
 
 GameLife::GameLife(std::vector<std::vector<CellGoL>> in_tile) : height(in_tile.size()), width(in_tile.at(0).size()) {
 
@@ -138,6 +122,7 @@ GameLife::GameLife(std::vector<std::vector<int>> in_tile) : height(in_tile.size(
 GameLife::~GameLife(){
 
 };
+
 int GameLife::update() {
 
     std::vector<std::vector<CellGoL>> oldTile;
@@ -165,23 +150,29 @@ int GameLife::checkCell(int in_y, int in_x, std::vector<std::vector<CellGoL>>* o
         return 1;
     }
 
+    bool isRightSafe = right < width;
+    bool isLeftSafe = left > 0;
+    bool isHeadSafe = head < height;
+    bool isFootSafe = foot > 0;
+
     int numLivCel = 0;
-    if ((head < height) && (right < width) && oldTile->at(head).at(right).isAlive)
+    if (isHeadSafe && isRightSafe && oldTile->at(head).at(right).isAlive)
         numLivCel++;
-    if ((head < height) && oldTile->at(head).at(in_x).isAlive)
+    if (isHeadSafe && oldTile->at(head).at(in_x).isAlive)
         numLivCel++;
-    if ((head < height) && (left > 0) && oldTile->at(head).at(left).isAlive)
+    if (isHeadSafe && isLeftSafe && oldTile->at(head).at(left).isAlive)
         numLivCel++;
-    if ((left > 0) && oldTile->at(in_y).at(left).isAlive)
+    if (isLeftSafe && oldTile->at(in_y).at(left).isAlive)
         numLivCel++;
-    if ((right < width) && oldTile->at(in_y).at(right).isAlive)
+    if (isRightSafe && oldTile->at(in_y).at(right).isAlive)
         numLivCel++;
-    if ((right < width) && (foot > 0) && oldTile->at(foot).at(right).isAlive)
+    if (isRightSafe && isFootSafe && oldTile->at(foot).at(right).isAlive)
         numLivCel++;
-    if ((foot > 0) && oldTile->at(foot).at(in_x).isAlive)
+    if (isFootSafe && oldTile->at(foot).at(in_x).isAlive)
         numLivCel++;
-    if ((foot > 0) && (left > 0) && oldTile->at(foot).at(left).isAlive)
+    if (isFootSafe && isLeftSafe && oldTile->at(foot).at(left).isAlive)
         numLivCel++;
+
     if (oldTile->at(in_y).at(in_x).isAlive) {
         if (numLivCel == 2 || numLivCel == 3) {
         } else
@@ -192,6 +183,23 @@ int GameLife::checkCell(int in_y, int in_x, std::vector<std::vector<CellGoL>>* o
     }
     return 0;
 };
+
+int GameLife::dispOutput(GameLife* LG) {
+    system("cls");
+    std::vector<std::vector<int>> OP = LG->output();
+    for (int i = 0; i < OP.size(); i++) {
+        for (int j = 0; j < OP.at(0).size(); j++) {
+            if (!OP.at(i).at(j)) {
+                std::cout << "□ ";
+            } else {
+                std::cout << "■ ";
+            }
+        }
+        std::cout << std::endl;
+    }
+    return 0;
+};
+
 std::vector<std::vector<int>> GameLife::output() {
     std::vector<std::vector<int>> OP;
     for (int i = 0; i < height; i++) {
