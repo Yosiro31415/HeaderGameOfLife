@@ -1,53 +1,39 @@
-﻿/* This is a header for using game of life.
- * You can include this header. And using some class for game of life.
- * If you want to use, you can decleare by using namespace GOL
- * 
- * The following is a bullet list of how to use.
- * 1.Create instance of GameLife like "" GOL::GameLife GL= GameLife() "".
- * 2.Use update() method for update like "" GL.update() "".
- * 3.Use output() method, you can get updated 2Dvector configurated by int.
- * 3.or If you want to use this in Command line you can use dispOutput() method. 
- * over.
- * 
- * If you want to set initial conditions, you can use constructa by using prepared 2Dvector contains int.
- * exp ""GOL::GameLife GL= GameLife(preparedVector)  ""
- * 
- */
-
-#ifndef _GAMEOFLIFE_
+﻿#ifndef _GAMEOFLIFE_
 #define _GAMEOFLIFE_
 
 #include <vector>
 #include <iostream>
 #include <random>
+#include <queue>
 
 namespace GOL {
 struct CellGoL {
     bool isAlive = false;
 };
 
-class GameLife {
+class GameOfLife {
     const int height;
     const int width;
 
     std::vector<std::vector<CellGoL>> tile = {}; //(y,x)coodinate
+    std::queue<int> listCellAlive = {};
     int checkCell(int in_y, int in_x, std::vector<std::vector<CellGoL>>* oldTile);
 
 public:
-    GameLife();
-    GameLife(int in_height, int in_width);
-    GameLife(int probability);
-    GameLife(int in_height, int in_width, int probability);
-    GameLife(std::vector<std::vector<CellGoL>> in_tile);
-    GameLife(std::vector<std::vector<int>> in_tile);
-    ~GameLife();
+    GameOfLife();
+    GameOfLife(int in_height, int in_width);
+    GameOfLife(int probability);
+    GameOfLife(int in_height, int in_width, int probability);
+    GameOfLife(std::vector<std::vector<CellGoL>> in_tile);
+    GameOfLife(std::vector<std::vector<int>> in_tile);
+    ~GameOfLife();
     int update();
-    std::vector<std::vector<int>> output();
+    std::vector<std::vector<int>> outputTile();
 
-    int dispOutput(GameLife* LG);
+    int dispOutput(GameOfLife* LG);
 };
 
-GameLife::GameLife() : width(500), height(500) {
+GameOfLife::GameOfLife() : width(500), height(500) {
     std::mt19937 mt{std::random_device{}()};
     std::uniform_int_distribution<int> dist(0, 99);
 
@@ -64,7 +50,7 @@ GameLife::GameLife() : width(500), height(500) {
     }
 }
 
-GameLife::GameLife(int probability) : width(500), height(500) {
+GameOfLife::GameOfLife(int probability) : width(500), height(500) {
     std::mt19937 mt{std::random_device{}()};
     std::uniform_int_distribution<int> dist(0, 99);
 
@@ -81,7 +67,7 @@ GameLife::GameLife(int probability) : width(500), height(500) {
     }
 }
 
-GameLife::GameLife(int in_height, int in_width) : width(in_width), height(in_height) {
+GameOfLife::GameOfLife(int in_height, int in_width) : width(in_width), height(in_height) {
     std::mt19937 mt{std::random_device{}()};
     std::uniform_int_distribution<int> dist(0, 99);
 
@@ -98,7 +84,7 @@ GameLife::GameLife(int in_height, int in_width) : width(in_width), height(in_hei
     }
 }
 
-GameLife::GameLife(int in_height, int in_width, int probability) : width(in_width), height(in_height) {
+GameOfLife::GameOfLife(int in_height, int in_width, int probability) : width(in_width), height(in_height) {
     std::mt19937 mt{std::random_device{}()};
     std::uniform_int_distribution<int> dist(0, 99);
 
@@ -115,12 +101,13 @@ GameLife::GameLife(int in_height, int in_width, int probability) : width(in_widt
     }
 }
 
-GameLife::GameLife(std::vector<std::vector<CellGoL>> in_tile) : height(in_tile.size()), width(in_tile.at(0).size()) {
+GameOfLife::GameOfLife(std::vector<std::vector<CellGoL>> in_tile)
+    : height(in_tile.size()), width(in_tile.at(0).size()) {
 
     tile = in_tile;
 };
 
-GameLife::GameLife(std::vector<std::vector<int>> in_tile) : height(in_tile.size()), width(in_tile.at(0).size()) {
+GameOfLife::GameOfLife(std::vector<std::vector<int>> in_tile) : height(in_tile.size()), width(in_tile.at(0).size()) {
 
     for (int i = 0; i < height; i++) {
         std::vector<CellGoL> line = {};
@@ -134,11 +121,11 @@ GameLife::GameLife(std::vector<std::vector<int>> in_tile) : height(in_tile.size(
     }
 };
 
-GameLife::~GameLife(){
+GameOfLife::~GameOfLife(){
 
 };
 
-int GameLife::update() {
+int GameOfLife::update() {
 
     std::vector<std::vector<CellGoL>> oldTile;
     oldTile = tile;
@@ -151,7 +138,7 @@ int GameLife::update() {
     return 0;
 };
 
-int GameLife::checkCell(int in_y, int in_x, std::vector<std::vector<CellGoL>>* oldTile) {
+int GameOfLife::checkCell(int in_y, int in_x, std::vector<std::vector<CellGoL>>* oldTile) {
 
     int head = in_y + 1;
     int foot = in_y - 1;
@@ -199,9 +186,9 @@ int GameLife::checkCell(int in_y, int in_x, std::vector<std::vector<CellGoL>>* o
     return 0;
 };
 
-int GameLife::dispOutput(GameLife* LG) {
+int GameOfLife::dispOutput(GameOfLife* LG) {
     system("cls");
-    std::vector<std::vector<int>> OP = LG->output();
+    std::vector<std::vector<int>> OP = LG->outputTile();
     for (int i = 0; i < OP.size(); i++) {
         for (int j = 0; j < OP.at(0).size(); j++) {
             if (!OP.at(i).at(j)) {
@@ -215,7 +202,7 @@ int GameLife::dispOutput(GameLife* LG) {
     return 0;
 };
 
-std::vector<std::vector<int>> GameLife::output() {
+std::vector<std::vector<int>> GameOfLife::outputTile() {
     std::vector<std::vector<int>> OP;
     for (int i = 0; i < height; i++) {
         std::vector<int> line = {};
